@@ -6,7 +6,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import ScrollTriggerText from "@/components/sections/SpaceSection/ScrollTriggerText";
 import ClientMarqueeSection from "@/components/sections/ClientMarqueeSection/ClientMarqueeSection";
-import VideoScaleSection from "@/components/sections/VideoScaleSection/VideoScaleSection";
+import VideoScaleSection from "@/components/common/VideoScale";
 import StickyNav from "@/components/common/StickyNav";
 
 export default function SpaceSection() {

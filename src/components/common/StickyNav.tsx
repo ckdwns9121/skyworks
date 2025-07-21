@@ -9,31 +9,16 @@ interface StickyNavProps {
 export default function StickyNav({ title, index, total }: StickyNavProps) {
   return (
     <nav
-      style={{
-        position: "sticky",
-        top: 0,
-        left: 0,
-        width: "100%",
-        zIndex: 100,
-        background: "transparent",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        height: 64,
-        padding: "0 32px",
-        color: "#aaa",
-        fontSize: 24,
-        fontWeight: 500,
-        letterSpacing: 0.5,
-        pointerEvents: "auto",
-        userSelect: "none",
-      }}
+      className="sticky top-1/2 -translate-y-1/2 left-0 w-full z-[100] bg-transparent flex items-center justify-center h-16 px-8 text-[#aaa] text-2xl font-medium tracking-wide pointer-events-auto select-none mix-blend-difference"
+      style={{ minHeight: 64 }}
     >
-      <span style={{ fontSize: 18, color: "#aaa" }}>Work</span>
-      <span style={{ fontSize: 40, color: "#aaa", fontWeight: 600 }}>{title}</span>
-      <span style={{ fontSize: 18, color: "#aaa" }}>
-        ({index + 1} / {total})
-      </span>
+      <div className="flex items-center justify-between w-full max-w-8xl mx-auto">
+        <span className="text-lg text-[#aaa]">Work</span>
+        <span className="text-6xl text-[#aaa] font-semibold">{title}</span>
+        <span className="text-lg text-[#aaa]">
+          ({index + 1} / {total})
+        </span>
+      </div>
     </nav>
   );
 }

@@ -2,11 +2,11 @@
 import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import styles from "./TextClipEffect.module.css";
+import styles from "./ScrollTriggerText.module.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export type TextClipEffectItemProps = {
+export type ScrollTriggerTextProps = {
   main: string;
   className?: string;
   showMarkers?: boolean;
@@ -15,14 +15,14 @@ export type TextClipEffectItemProps = {
   scrubEffect?: boolean;
 };
 
-export default function TextClipEffectItem({
+export default function ScrollTriggerText({
   main,
   className,
   showMarkers = false,
   startPosition = "center 150%",
   endPosition = "center 0%",
   scrubEffect = true,
-}: TextClipEffectItemProps) {
+}: ScrollTriggerTextProps) {
   const charRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const textRef = useRef<HTMLHeadingElement>(null);
 
@@ -57,6 +57,7 @@ export default function TextClipEffectItem({
     return () => {
       // 컴포넌트 언마운트 시 ScrollTrigger 정리
       ScrollTrigger.getAll().forEach((trigger) => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         if (charRefs.current.includes(trigger.trigger as HTMLSpanElement)) {
           trigger.kill();
         }
