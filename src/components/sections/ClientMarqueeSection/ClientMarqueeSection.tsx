@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import MarqueeLogo from "./MarqueeLogo";
+import MarqueeLogo from "../../common/MarqueeLogo";
 
-export default function ClientMarqueeSection() {
+export default function ClientMarqueeSection({ onDarkChange }: { onDarkChange?: (dark: boolean) => void } = {}) {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [dark, setDark] = useState(false);
+  const [bgState, setBgState] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,7 +12,16 @@ export default function ClientMarqueeSection() {
       const windowHeight = window.innerHeight;
       const visible = Math.max(0, Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0));
       const ratio = visible / rect.height;
-      setDark(ratio > 0.5);
+      let newBgState: "dark" | "light";
+      if (ratio < 0.5) {
+        newBgState = "dark";
+      } else if (ratio < 0.9) {
+        newBgState = "light";
+      } else {
+        newBgState = "dark";
+      }
+      setBgState(newBgState);
+      if (onDarkChange) onDarkChange(newBgState === "dark");
     };
     window.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleScroll);
@@ -21,15 +30,15 @@ export default function ClientMarqueeSection() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, []);
+  }, [onDarkChange]);
 
   return (
     <div
       ref={sectionRef}
-      className="h-[100vh] flex flex-col items-center justify-center text-3xl transition-colors duration-700"
+      className="h-[200vh] flex flex-col items-center justify-center text-3xl transition-colors duration-700"
       style={{
-        background: dark ? "#151515" : "#fff",
-        color: dark ? "#fff" : "#151515",
+        background: bgState === "dark" ? "#151515" : "#fff",
+        color: bgState === "dark" ? "#fff" : "#151515",
       }}
     >
       <div className="mb-8 text-center text-2xl font-bold">함께한 클라이언트</div>

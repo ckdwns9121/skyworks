@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import ScrollTriggerText from "./ScrollTriggerText";
-import MarqueeLogo from "./MarqueeLogo";
-import ClientMarqueeSection from "./ClientMarqueeSection";
+import ScrollTriggerText from "@/components/sections/SpaceSection/ScrollTriggerText";
+import ClientMarqueeSection from "@/components/sections/ClientMarqueeSection/ClientMarqueeSection";
+import VideoScaleSection from "@/components/sections/VideoScaleSection/VideoScaleSection";
+import StickyNav from "@/components/common/StickyNav";
 
 export default function SpaceSection() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -18,6 +19,16 @@ export default function SpaceSection() {
   const particlesRef = useRef<THREE.Points | null>(null);
   const animationRef = useRef<number | null>(null);
   // ScrollTriggerText 관련 상태 모두 제거
+  const [clientDark, setClientDark] = useState(false); // 클라이언트 섹션의 dark 상태
+  const videoList = [
+    { src: "/videos/hero-video.mp4", text: "Music & Live" },
+    { src: "/videos/hero-video.mp4", text: "Concert & Event" },
+    { src: "/videos/hero-video.mp4", text: "Brand Film" },
+    { src: "/videos/hero-video.mp4", text: "Documentary" },
+    { src: "/videos/hero-video.mp4", text: "Advertising" },
+  ];
+  const [currentVideoIdx, setCurrentVideoIdx] = useState(0);
+  const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -200,6 +211,33 @@ export default function SpaceSection() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      // 각 비디오 섹션의 중앙이 화면 중앙에 가장 가까운 것의 인덱스를 찾음
+      const windowCenter = window.innerHeight / 2;
+      let minDist = Infinity;
+      let idx = 0;
+      videoRefs.current.forEach((ref, i) => {
+        if (!ref) return;
+        const rect = ref.getBoundingClientRect();
+        const sectionCenter = rect.top + rect.height / 2;
+        const dist = Math.abs(sectionCenter - windowCenter);
+        if (dist < minDist) {
+          minDist = dist;
+          idx = i;
+        }
+      });
+      setCurrentVideoIdx(idx);
+    };
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleScroll);
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
+
   return (
     <>
       <section
@@ -226,7 +264,25 @@ export default function SpaceSection() {
         </div>
       </section>
       {/* 다음 섹션(로고 마퀴) */}
-      <ClientMarqueeSection />
+      <ClientMarqueeSection onDarkChange={setClientDark} />
+      {/* 비디오 섹션 전체를 감싸는 래퍼 */}
+      <div style={{ position: "relative" }}>
+        <StickyNav title={videoList[currentVideoIdx].text} index={currentVideoIdx} total={videoList.length} />
+        {videoList.map((item, idx) => (
+          <VideoScaleSection
+            key={idx}
+            videoSrc={item.src}
+            text={item.text}
+            index={idx}
+            dark={clientDark}
+            ref={(el) => {
+              if (el) {
+                videoRefs.current[idx] = el;
+              }
+            }}
+          />
+        ))}
+      </div>
     </>
   );
 }
