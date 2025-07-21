@@ -24,7 +24,7 @@ export default function SpaceSection() {
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 1000); // aspect는 아래에서 설정
-    camera.position.set(0, 0, 5);
+    camera.position.set(0, 0, 15);
     cameraRef.current = camera;
 
     // mountRef의 크기를 기준으로 캔버스 크기 설정
@@ -164,14 +164,14 @@ export default function SpaceSection() {
       const visibleRatio = (window.innerHeight - rect.top) / rect.height;
       if (cameraRef.current && particlesRef.current) {
         if (visibleRatio < 0.5) {
-          cameraRef.current.position.set(0, 0, 5);
+          cameraRef.current.position.set(0, 0, 15);
           cameraRef.current.lookAt(0, 0, 0);
           return;
         }
         const progress = Math.min((visibleRatio - 0.5) / 0.5, 1);
-        const startPos = new THREE.Vector3(0, 0, 5);
-        const midPos = new THREE.Vector3(0, 0, 20);
-        const endPos = new THREE.Vector3(0, 10, 10);
+        const startPos = new THREE.Vector3(0, 0, 15);
+        const midPos = new THREE.Vector3(0, 0, 40);
+        const endPos = new THREE.Vector3(0, 10, 25);
         const rotationAmount = Math.PI * 1.5;
         if (progress < 0.6) {
           const phase = progress / 0.6;
