@@ -55,7 +55,6 @@ export default function SpaceSection() {
     const sizes = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
-      const angle = Math.random() * Math.PI * 4;
       let radius;
       const ratio = Math.random();
       if (ratio < 0.05) {
@@ -211,13 +210,13 @@ export default function SpaceSection() {
         {/* three.js 캔버스 */}
         <div
           ref={mountRef}
-          className="sticky top-0 w-full h-screen opacity-60 pointer-events-none box-border m-0 p-0 border-0 text-[100%] align-baseline"
+          className="sticky top-0 w-full h-screen opacity-40 pointer-events-none box-border m-0 p-0 border-0 text-[100%] align-baseline"
           style={{
             lineHeight: 1,
           }}
         />
 
-        <div className="sticky top-[0px] w-[80vw] mx-auto h-[100vh] flex items-center justify-center opacity-60 pointer-events-none box-border m-0 p-0 border-0 text-[100%] align-baseline">
+        <div className="sticky top-[0px] w-[80vw] mx-auto h-[100vh] flex items-center justify-center pointer-events-none box-border m-0 p-0 mt-[-50vh] border-0 text-[100%] align-baseline">
           <ScrollTriggerText
             main="탄탄한 기획력과 현장 실행력을 바탕으로 최고의 결과물을 만듭니다."
             className="text-center"
