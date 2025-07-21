@@ -1,0 +1,209 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+
+export default function SpaceSection() {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const composerRef = useRef<EffectComposer | null>(null);
+  const particlesRef = useRef<THREE.Points | null>(null);
+  const animationRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!mountRef.current) return;
+
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+
+    const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 1000); // aspect는 아래에서 설정
+    camera.position.set(0, 0, 5);
+    cameraRef.current = camera;
+
+    // mountRef의 크기를 기준으로 캔버스 크기 설정
+    const width = mountRef.current.clientWidth;
+    const height = mountRef.current.clientHeight;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setClearColor("#151515"); // 배경색 설정
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    mountRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // 카메라 비율도 mountRef 기준으로 설정
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+
+    // POST-PROCESSING: Composer + Bloom (강도 낮춤)
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    // bloom 효과 제거
+    composerRef.current = composer;
+
+    // PARTICLES
+    const particleCount = 100000;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 4;
+      const radius = Math.pow(Math.random(), 2) * 10;
+      const branch = ((i % 4) / 4) * Math.PI * 2;
+      const spin = radius * 1.5;
+
+      const x = Math.cos(branch + spin) * radius + (Math.random() - 0.5) * 0.5;
+      const y = (Math.random() - 0.5) * 0.5;
+      const z = Math.sin(branch + spin) * radius + (Math.random() - 0.5) * 0.5;
+
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+
+      sizes[i] = Math.max(0.05, 0.2 - Math.sqrt(x * x + y * y) * 0.01);
+
+      const colorVariation = Math.random();
+      if (radius < 2) {
+        // 중심부 → 적당히 밝게 (너무 과하지 않게 1.5~2)
+        colors[i * 3] = 2;
+        colors[i * 3 + 1] = 2;
+        colors[i * 3 + 2] = 2;
+      } else if (colorVariation < 0.3) {
+        colors[i * 3] = 1;
+        colors[i * 3 + 1] = 1;
+        colors[i * 3 + 2] = 1;
+      } else if (colorVariation < 0.6) {
+        colors[i * 3] = 1;
+        colors[i * 3 + 1] = 0.7;
+        colors[i * 3 + 2] = 0.3;
+      } else {
+        colors[i * 3] = 0.4;
+        colors[i * 3 + 1] = 0.6;
+        colors[i * 3 + 2] = 1;
+      }
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
+
+    const material = new THREE.ShaderMaterial({
+      uniforms: { time: { value: 0 } },
+      vertexShader: /* glsl */ `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        varying float vAlpha;
+        uniform float time;
+        
+        void main() {
+          vColor = color;
+          float flicker = sin(time * 2.0 + position.x * 50.0 + position.y * 50.0) * 0.3 + 0.7;
+          vAlpha = flicker;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * (300.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        
+        void main() {
+          float distance = length(gl_PointCoord - vec2(0.5));
+          if (distance > 0.5) discard;
+          float alpha = 1.0 - smoothstep(0.0, 0.5, distance);
+          gl_FragColor = vec4(vColor, alpha * vAlpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+    particlesRef.current = particles;
+
+    const animate = () => {
+      animationRef.current = requestAnimationFrame(animate);
+      const time = Date.now() * 0.001;
+
+      if (particlesRef.current) {
+        particlesRef.current.rotation.y += 0.0005;
+        (particlesRef.current.material as THREE.ShaderMaterial).uniforms.time.value = time;
+      }
+
+      if (composerRef.current) {
+        composerRef.current.render();
+      }
+    };
+    animate();
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
+      const progress = Math.min(scrollY / maxScroll, 1);
+
+      const startPos = new THREE.Vector3(0, 0, 5);
+      const midPos = new THREE.Vector3(0, 0, 20);
+      const endPos = new THREE.Vector3(0, 10, 10);
+      const rotationAmount = Math.PI * 1.5;
+
+      if (cameraRef.current && particlesRef.current) {
+        if (progress < 0.6) {
+          const phase = progress / 0.6;
+          cameraRef.current.position.lerpVectors(startPos, midPos, phase);
+          particlesRef.current.rotation.y = rotationAmount * phase;
+        } else {
+          const phase = (progress - 0.6) / 0.4;
+          cameraRef.current.position.lerpVectors(midPos, endPos, phase);
+          particlesRef.current.rotation.y = rotationAmount;
+        }
+
+        cameraRef.current.lookAt(0, 0, 0);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+
+    const handleResize = () => {
+      if (cameraRef.current && rendererRef.current && composerRef.current && mountRef.current) {
+        const width = mountRef.current.clientWidth;
+        const height = mountRef.current.clientHeight;
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(width, height);
+        composerRef.current.setSize(width, height);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+      if (mountRef.current && rendererRef.current) {
+        mountRef.current.removeChild(rendererRef.current.domElement);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full min-h-[300vh]">
+      {/* 화면 전체를 덮는 three.js 캔버스 */}
+      <div
+        ref={mountRef}
+        className="fixed top-0 left-0 w-screen h-screen z-0"
+        style={{ width: "100vw", height: "100vh", pointerEvents: "none" }}
+      />
+      {/* 안내 텍스트 등 다른 요소는 필요시 추가 */}
+    </div>
+  );
+}
