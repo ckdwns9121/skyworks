@@ -4,16 +4,18 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import ScrollTriggerText from "./ScrollTriggerText";
 
 export default function SpaceSection() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const composerRef = useRef<EffectComposer | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
   const animationRef = useRef<number | null>(null);
+  // ScrollTriggerText 관련 상태 모두 제거
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -54,7 +56,15 @@ export default function SpaceSection() {
 
     for (let i = 0; i < particleCount; i++) {
       const angle = Math.random() * Math.PI * 4;
-      const radius = Math.pow(Math.random(), 2) * 10;
+      let radius;
+      const ratio = Math.random();
+      if (ratio < 0.05) {
+        // 5%만 중심부(0~2)에 생성
+        radius = Math.random() * 2;
+      } else {
+        // 95%는 2~10에 생성
+        radius = 2 + Math.random() * 8;
+      }
       const branch = ((i % 4) / 4) * Math.PI * 2;
       const spin = radius * 1.5;
 
@@ -137,6 +147,7 @@ export default function SpaceSection() {
       const time = Date.now() * 0.001;
 
       if (particlesRef.current) {
+        // 기본 회전(항상 적용)
         particlesRef.current.rotation.y += 0.0005;
         (particlesRef.current.material as THREE.ShaderMaterial).uniforms.time.value = time;
       }
@@ -148,16 +159,21 @@ export default function SpaceSection() {
     animate();
 
     const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const progress = Math.min(scrollY / maxScroll, 1);
-
-      const startPos = new THREE.Vector3(0, 0, 5);
-      const midPos = new THREE.Vector3(0, 0, 20);
-      const endPos = new THREE.Vector3(0, 10, 10);
-      const rotationAmount = Math.PI * 1.5;
-
+      // ... three.js 카메라/파티클 스크롤 효과만 남김 ...
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const visibleRatio = (window.innerHeight - rect.top) / rect.height;
       if (cameraRef.current && particlesRef.current) {
+        if (visibleRatio < 0.5) {
+          cameraRef.current.position.set(0, 0, 5);
+          cameraRef.current.lookAt(0, 0, 0);
+          return;
+        }
+        const progress = Math.min((visibleRatio - 0.5) / 0.5, 1);
+        const startPos = new THREE.Vector3(0, 0, 5);
+        const midPos = new THREE.Vector3(0, 0, 20);
+        const endPos = new THREE.Vector3(0, 10, 10);
+        const rotationAmount = Math.PI * 1.5;
         if (progress < 0.6) {
           const phase = progress / 0.6;
           cameraRef.current.position.lerpVectors(startPos, midPos, phase);
@@ -167,28 +183,16 @@ export default function SpaceSection() {
           cameraRef.current.position.lerpVectors(midPos, endPos, phase);
           particlesRef.current.rotation.y = rotationAmount;
         }
-
         cameraRef.current.lookAt(0, 0, 0);
       }
     };
     window.addEventListener("scroll", handleScroll);
-
-    const handleResize = () => {
-      if (cameraRef.current && rendererRef.current && composerRef.current && mountRef.current) {
-        const width = mountRef.current.clientWidth;
-        const height = mountRef.current.clientHeight;
-        cameraRef.current.aspect = width / height;
-        cameraRef.current.updateProjectionMatrix();
-        rendererRef.current.setSize(width, height);
-        composerRef.current.setSize(width, height);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
+    window.addEventListener("resize", handleScroll);
+    handleScroll();
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleScroll);
       if (mountRef.current && rendererRef.current) {
         mountRef.current.removeChild(rendererRef.current.domElement);
       }
@@ -196,14 +200,34 @@ export default function SpaceSection() {
   }, []);
 
   return (
-    <div className="relative w-full min-h-[300vh]">
-      {/* 화면 전체를 덮는 three.js 캔버스 */}
-      <div
-        ref={mountRef}
-        className="fixed top-0 left-0 w-screen h-screen z-0"
-        style={{ width: "100vw", height: "100vh", pointerEvents: "none" }}
-      />
-      {/* 안내 텍스트 등 다른 요소는 필요시 추가 */}
-    </div>
+    <>
+      <section
+        ref={sectionRef}
+        className="relative z-10 h-[500vh] bg-[#151515] w-full font-[Pretendard,Hanken_Grotesk,-apple-system,BlinkMacSystemFont,system-ui,Roboto,Helvetica_Neue,Segoe_UI,Apple_SD_Gothic_Neo,Noto_Sans_KR,Malgun_Gothic,Apple_Color_Emoji,Segoe_UI_Emoji,Segoe_UI_Symbol,sans-serif] box-border m-0 p-0 border-0 text-[100%] align-baseline block"
+        style={{
+          lineHeight: 1,
+        }}
+      >
+        {/* three.js 캔버스 */}
+        <div
+          ref={mountRef}
+          className="sticky top-0 w-full h-screen opacity-60 pointer-events-none box-border m-0 p-0 border-0 text-[100%] align-baseline"
+          style={{
+            lineHeight: 1,
+          }}
+        />
+
+        <div className="sticky top-[0px] w-[80vw] mx-auto h-[100vh] flex items-center justify-center opacity-60 pointer-events-none box-border m-0 p-0 border-0 text-[100%] align-baseline">
+          <ScrollTriggerText
+            main="탄탄한 기획력과 현장 실행력을 바탕으로 최고의 결과물을 만듭니다."
+            className="text-center"
+          />
+        </div>
+      </section>
+      {/* 다음 섹션(예시) */}
+      <section className="h-[100vh] bg-[#151515] flex items-center justify-center text-white text-3xl">
+        다음 섹션입니다!
+      </section>
+    </>
   );
 }
