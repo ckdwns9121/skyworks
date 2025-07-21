@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import ScrollTriggerText from "./ScrollTriggerText";
+import MarqueeLogo from "./MarqueeLogo";
+import ClientMarqueeSection from "./ClientMarqueeSection";
 
 export default function SpaceSection() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -223,10 +225,8 @@ export default function SpaceSection() {
           />
         </div>
       </section>
-      {/* 다음 섹션(예시) */}
-      <section className="h-[100vh] bg-[#151515] flex items-center justify-center text-white text-3xl">
-        다음 섹션입니다!
-      </section>
+      {/* 다음 섹션(로고 마퀴) */}
+      <ClientMarqueeSection />
     </>
   );
 }
