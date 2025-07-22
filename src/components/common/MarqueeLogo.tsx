@@ -15,13 +15,7 @@ export default function MarqueeLogo({ images, height = 60 }: MarqueeLogoProps) {
       <div className={styles.marqueeTrack}>
         {marqueeImages.map((src, idx) => (
           <div className={styles.logoItem} key={idx} style={{ height }}>
-            <Image
-              src={src}
-              alt="logo"
-              width={160}
-              height={height}
-              style={{ height: "100%", maxWidth: 160, objectFit: "contain" }}
-            />
+            <Image src={src} alt="logo" width={500} height={height} className={styles.logoImage} />
           </div>
         ))}
       </div>
