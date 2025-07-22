@@ -37,7 +37,7 @@ export default function SpaceSection() {
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 1000); // aspect는 아래에서 설정
-    camera.position.set(0, 0, 15);
+    camera.position.set(0, 0, 8); // 15 → 8로 변경
     cameraRef.current = camera;
 
     // mountRef의 크기를 기준으로 캔버스 크기 설정
@@ -74,8 +74,8 @@ export default function SpaceSection() {
         // 5%만 중심부(0~2)에 생성
         radius = Math.random() * 2;
       } else {
-        // 95%는 2~10에 생성
-        radius = 2 + Math.random() * 8;
+        // 95%는 2~20에 생성 (기존 2~8 → 2~20)
+        radius = 2 + Math.random() * 18;
       }
       const branch = ((i % 4) / 4) * Math.PI * 2;
       const spin = radius * 1.5;
@@ -182,9 +182,9 @@ export default function SpaceSection() {
           return;
         }
         const progress = Math.min((visibleRatio - 0.5) / 0.5, 1);
-        const startPos = new THREE.Vector3(0, 0, 15);
-        const midPos = new THREE.Vector3(0, 0, 40);
-        const endPos = new THREE.Vector3(0, 10, 25);
+        const startPos = new THREE.Vector3(0, 0, 8); // 15 → 8
+        const midPos = new THREE.Vector3(0, 0, 18); // 40 → 18
+        const endPos = new THREE.Vector3(0, 10, 12); // 25 → 12
         const rotationAmount = Math.PI * 1.5;
         if (progress < 0.6) {
           const phase = progress / 0.6;
