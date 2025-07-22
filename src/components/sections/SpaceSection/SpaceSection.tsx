@@ -154,6 +154,46 @@ export default function SpaceSection() {
     scene.add(particles);
     particlesRef.current = particles;
 
+    // === 안개 파티클 추가 (별 파티클과 같은 분포, 적은 수, 크게, 투명하게) ===
+    const fogParticleCount = 60; // 훨씬 적게
+    const fogPositions = new Float32Array(fogParticleCount * 3);
+    const fogSizes = new Float32Array(fogParticleCount);
+    for (let i = 0; i < fogParticleCount; i++) {
+      let radius;
+      const ratio = Math.random();
+      if (ratio < 0.05) {
+        radius = Math.random() * 2;
+      } else {
+        radius = 2 + Math.random() * 18;
+      }
+      const branch = ((i % 4) / 4) * Math.PI * 2;
+      const spin = radius * 1.5;
+      const x = Math.cos(branch + spin) * radius + (Math.random() - 0.5) * 0.5;
+      const y = (Math.random() - 0.5) * 0.5;
+      const z = Math.sin(branch + spin) * radius + (Math.random() - 0.5) * 0.5;
+      fogPositions[i * 3] = x;
+      fogPositions[i * 3 + 1] = y;
+      fogPositions[i * 3 + 2] = z;
+      fogSizes[i] = 10 + Math.random() * 14; // 10~24 사이 크게
+    }
+    const fogGeometry = new THREE.BufferGeometry();
+    fogGeometry.setAttribute("position", new THREE.BufferAttribute(fogPositions, 3));
+    fogGeometry.setAttribute("size", new THREE.BufferAttribute(fogSizes, 1));
+    const fogTexture = new THREE.TextureLoader().load("/images/assets/particle_blur.png");
+    const fogMaterial = new THREE.PointsMaterial({
+      map: fogTexture,
+      size: 16,
+      transparent: true,
+      opacity: 0.09,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      color: 0x6ecaff, // 밝은 파랑
+    });
+    const fogParticles = new THREE.Points(fogGeometry, fogMaterial);
+    fogParticles.name = "fogParticles";
+    scene.add(fogParticles);
+    // === 안개 파티클 추가 끝 ===
+
     const animate = () => {
       animationRef.current = requestAnimationFrame(animate);
       const time = Date.now() * 0.001;
@@ -162,6 +202,11 @@ export default function SpaceSection() {
         // 기본 회전(항상 적용)
         particlesRef.current.rotation.y += 0.0005;
         (particlesRef.current.material as THREE.ShaderMaterial).uniforms.time.value = time;
+      }
+      // 안개 파티클도 약간씩 회전
+      const fog = scene.getObjectByName("fogParticles");
+      if (fog) {
+        fog.rotation.y += 0.00015;
       }
 
       if (composerRef.current) {
@@ -190,12 +235,13 @@ export default function SpaceSection() {
           const phase = progress / 0.6;
           cameraRef.current.position.lerpVectors(startPos, midPos, phase);
           particlesRef.current.rotation.y = rotationAmount * phase;
+          cameraRef.current.lookAt(0, 0, 0);
         } else {
           const phase = (progress - 0.6) / 0.4;
           cameraRef.current.position.lerpVectors(midPos, endPos, phase);
           particlesRef.current.rotation.y = rotationAmount;
+          cameraRef.current.lookAt(0, 0, 0);
         }
-        cameraRef.current.lookAt(0, 0, 0);
       }
     };
     window.addEventListener("scroll", handleScroll);
@@ -256,7 +302,7 @@ export default function SpaceSection() {
           }}
         />
 
-        <div className="sticky top-[0px] w-[80vw] mx-auto h-[100vh] flex items-center justify-center pointer-events-none box-border m-0 p-0 mt-[-50vh] border-0 text-[100%] align-baseline">
+        <div className="sticky top-[0px] w-[80vw] mx-auto h-[100vh] flex items-center justify-center pointer-events-none box-border m-0 p-0 mt-[-30vh] border-0 text-[100%] align-baseline">
           <ScrollTriggerText
             main="탄탄한 기획력과 현장 실행력을 바탕으로 최고의 결과물을 만듭니다."
             className="text-center"
