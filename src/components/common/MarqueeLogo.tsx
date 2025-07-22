@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./MarqueeLogo.module.css";
+import Image from "next/image";
 
 interface MarqueeLogoProps {
   images: string[];
@@ -14,7 +15,13 @@ export default function MarqueeLogo({ images, height = 60 }: MarqueeLogoProps) {
       <div className={styles.marqueeTrack}>
         {marqueeImages.map((src, idx) => (
           <div className={styles.logoItem} key={idx} style={{ height }}>
-            <img src={src} alt="logo" style={{ height: "100%", maxWidth: 160, objectFit: "contain" }} />
+            <Image
+              src={src}
+              alt="logo"
+              width={160}
+              height={height}
+              style={{ height: "100%", maxWidth: 160, objectFit: "contain" }}
+            />
           </div>
         ))}
       </div>
