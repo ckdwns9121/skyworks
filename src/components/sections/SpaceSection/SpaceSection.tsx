@@ -271,7 +271,7 @@ export default function SpaceSection() {
             main="(주)스카이웍스는 예술과 기술의 융합을 통해 창의적인 콘텐츠로 세상을 연결하는 영상프로덕션입니다.우리는 클라이언트의 니즈를 명확히 파악하여우리는 클라이언트의 니즈를 명확히 파악하여
                 탄탄한 기획력과 현장 실행력을 바탕으로 최고의 결과물을 만듭니다."
             className="text-center text-[2.5vw] sm:text-[1.5vw] md:text-[1.8vw] leading-[1.5]"
-            spreadPercent={6000}
+            spreadPercent={600}
           />
         </div>
       </div>

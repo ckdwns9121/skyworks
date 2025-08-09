@@ -44,7 +44,7 @@ export default function VideoReelSection({ videos, dark = false }: VideoReelSect
 
   return (
     <div style={{ position: "relative" }} className={styles.wrapper} data-video-reel>
-      <StickyNav title={videos[currentVideoIdx]?.text ?? ""} index={currentVideoIdx} total={videos.length} />
+      <StickyNav titles={videos.map((v) => v.text)} index={currentVideoIdx} total={videos.length} />
       {videos.map((item, idx) => (
         <VideoScaleSection
           key={idx}
