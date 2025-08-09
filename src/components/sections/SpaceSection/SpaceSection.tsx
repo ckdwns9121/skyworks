@@ -5,13 +5,11 @@ import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import ScrollTriggerText from "@/components/sections/SpaceSection/ScrollTriggerText";
-import ClientMarqueeSection from "@/components/sections/ClientMarqueeSection/ClientMarqueeSection";
-import VideoScaleSection from "@/components/common/VideoScale";
-import StickyNav from "@/components/common/StickyNav";
+// 섹션 분리: SpaceSection은 자체 3D와 카피만 담당하도록 변경
 
 export default function SpaceSection() {
   const mountRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -19,16 +17,7 @@ export default function SpaceSection() {
   const particlesRef = useRef<THREE.Points | null>(null);
   const animationRef = useRef<number | null>(null);
   // ScrollTriggerText 관련 상태 모두 제거
-  const [clientDark, setClientDark] = useState(false); // 클라이언트 섹션의 dark 상태
-  const videoList = [
-    { src: "/videos/hero-video.mp4", text: "Music & Live" },
-    { src: "/videos/hero-video.mp4", text: "Concert & Event" },
-    { src: "/videos/hero-video.mp4", text: "Brand Film" },
-    { src: "/videos/hero-video.mp4", text: "Documentary" },
-    { src: "/videos/hero-video.mp4", text: "Advertising" },
-  ];
-  const [currentVideoIdx, setCurrentVideoIdx] = useState(0);
-  const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // 섹션 외부 결합 제거: 다크 상태/비디오 리스트는 외부에서 관리
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -217,8 +206,8 @@ export default function SpaceSection() {
 
     const handleScroll = () => {
       // ... three.js 카메라/파티클 스크롤 효과만 남김 ...
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
       const visibleRatio = (window.innerHeight - rect.top) / rect.height;
       if (cameraRef.current && particlesRef.current) {
         if (visibleRatio < 0.5) {
@@ -257,37 +246,12 @@ export default function SpaceSection() {
     };
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      // 각 비디오 섹션의 중앙이 화면 중앙에 가장 가까운 것의 인덱스를 찾음
-      const windowCenter = window.innerHeight / 2;
-      let minDist = Infinity;
-      let idx = 0;
-      videoRefs.current.forEach((ref, i) => {
-        if (!ref) return;
-        const rect = ref.getBoundingClientRect();
-        const sectionCenter = rect.top + rect.height / 2;
-        const dist = Math.abs(sectionCenter - windowCenter);
-        if (dist < minDist) {
-          minDist = dist;
-          idx = i;
-        }
-      });
-      setCurrentVideoIdx(idx);
-    };
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleScroll);
-    handleScroll();
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, []);
+  // 외부 섹션들과의 결합 제거: SpaceSection 내부에서는 비디오/클라이언트 마퀴 인덱스 계산을 하지 않음
 
   return (
     <>
-      <section
-        ref={sectionRef}
+      <div
+        ref={containerRef}
         className="relative z-10 h-[500vh] bg-[#151515] w-full font-[Pretendard,Hanken_Grotesk,-apple-system,BlinkMacSystemFont,system-ui,Roboto,Helvetica_Neue,Segoe_UI,Apple_SD_Gothic_Neo,Noto_Sans_KR,Malgun_Gothic,Apple_Color_Emoji,Segoe_UI_Emoji,Segoe_UI_Symbol,sans-serif] box-border m-0 p-0 border-0 text-[100%] align-baseline block"
         style={{
           lineHeight: 1,
@@ -308,27 +272,8 @@ export default function SpaceSection() {
             className="text-center"
           />
         </div>
-      </section>
-      {/* 다음 섹션(로고 마퀴) */}
-      <ClientMarqueeSection onDarkChange={setClientDark} />
-      {/* 비디오 섹션 전체를 감싸는 래퍼 */}
-      <div style={{ position: "relative" }}>
-        <StickyNav title={videoList[currentVideoIdx].text} index={currentVideoIdx} total={videoList.length} />
-        {videoList.map((item, idx) => (
-          <VideoScaleSection
-            key={idx}
-            videoSrc={item.src}
-            text={item.text}
-            index={idx}
-            dark={clientDark}
-            ref={(el) => {
-              if (el) {
-                videoRefs.current[idx] = el;
-              }
-            }}
-          />
-        ))}
       </div>
+      {/* SpaceSection은 여기까지. 이후 섹션은 페이지에서 조립 */}
     </>
   );
 }

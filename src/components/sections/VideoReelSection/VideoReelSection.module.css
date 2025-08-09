@@ -1,0 +1,18 @@
+.wrapper {
+  background: #151515;
+  color: #ffffff;
+  transition: color 0.6s ease;
+  animation: bg-to-white 1s linear both paused;
+  animation-delay: calc(var(--videoProgress, 0) * -1s);
+}
+
+@keyframes bg-to-white {
+  0% {
+    background: #151515;
+    color: #ffffff;
+  }
+  100% {
+    background: #ffffff;
+    color: #151515;
+  }
+}
