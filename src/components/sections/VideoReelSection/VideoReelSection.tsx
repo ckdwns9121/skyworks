@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import StickyNav from "@/components/common/StickyNav";
 import VideoScale from "@/components/common/VideoScale";
 import styles from "./VideoReelSection.module.css";
+import Image from "next/image";
 
 export type VideoItem = { src: string; text: string };
 
@@ -59,6 +60,10 @@ export default function VideoReelSection({ videos, dark = false }: VideoReelSect
           }}
         />
       ))}
+      <div className="absolute top-0 left-0 w-full h-full">
+        여기여기
+        <Image src="/logo.svg" alt="logo" width={131} height={20} />
+      </div>
     </div>
   );
 }
