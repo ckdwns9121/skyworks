@@ -64,11 +64,11 @@ export default function Home() {
       <VideoReelSection
         dark={clientDark}
         videos={[
-          { src: "/videos/hero-video.mp4", text: "Music & Live" },
-          { src: "/videos/hero-video.mp4", text: "Concert & Event" },
-          { src: "/videos/hero-video.mp4", text: "Brand Film" },
-          { src: "/videos/hero-video.mp4", text: "Documentary" },
-          { src: "/videos/hero-video.mp4", text: "Advertising" },
+          { src: "/videos/video_main-music.mp4", text: "Music & Live" },
+          { src: "/videos/video_main-ad.mp4", text: "Advertising & Promotion" },
+          { src: "/videos/video_main-product.mp4", text: "Product promotion" },
+          { src: "/videos/video_main-youtube.mp4", text: "Youtube content" },
+          { src: "/videos/video_main-sketch.mp4", text: "Marketing & Sketch" },
         ]}
       />
       <TextMarqueeSection text="About SKYWorKS" />
