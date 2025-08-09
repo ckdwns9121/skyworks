@@ -9,7 +9,7 @@ interface StickyNavProps {
 export default function StickyNav({ title, index, total }: StickyNavProps) {
   return (
     <nav
-      className="sticky top-1/2 -translate-y-1/2 left-0 w-full z-[100] bg-transparent flex items-center justify-center h-16 px-8 text-[#aaa] text-2xl font-medium tracking-wide pointer-events-auto select-none mix-blend-difference"
+      className="sticky pt-30 top-1/2 -translate-y-1/2 left-0 w-full z-[100] bg-transparent flex items-center justify-center h-16 px-8 text-[#aaa] text-2xl font-medium tracking-wide pointer-events-auto select-none mix-blend-difference"
       style={{ minHeight: 64 }}
     >
       <div className="flex items-center justify-between w-full max-w-8xl mx-auto">

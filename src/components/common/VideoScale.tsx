@@ -24,7 +24,7 @@ const VideoScale = forwardRef<HTMLDivElement, VideoScaleProps>(({ videoSrc, text
       // 0(중앙) ~ 1(화면 밖)로 정규화
       const norm = Math.min(distance / maxDistance, 1);
       // scale up: 중앙에 가까울수록 커짐(최대 1.2), scale out: 중앙 지나면 작아짐(최소 0.7)
-      let s = 1 + (1 - norm) * 0.2; // 1~1.2
+      let s = 1 + (1 - norm) * 1.5; // 1~1.2
       if (norm > 0.5) {
         // 중앙에서 멀어질 때 scale out
         s = 1.2 - (norm - 0.5) * 1.0; // 1.2~0.7

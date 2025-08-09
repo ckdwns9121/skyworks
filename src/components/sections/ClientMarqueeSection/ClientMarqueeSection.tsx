@@ -17,6 +17,7 @@ const IMAGES_PATHS = [
 export default function ClientMarqueeSection({ onDarkChange }: { onDarkChange?: (dark: boolean) => void } = {}) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [bgState, setBgState] = useState<"dark" | "light">("dark");
+  const prevRatioRef = useRef(0);
 
   useEffect(() => {
     // sectionRef가 가리키는 DOM 노드를 가져옴
@@ -27,18 +28,38 @@ export default function ClientMarqueeSection({ onDarkChange }: { onDarkChange?: 
     // 이 옵저버는 해당 섹션이 뷰포트에 얼마나 보이는지(교차 비율)를 감지함
     const observer = new window.IntersectionObserver(
       ([entry]) => {
-        // entry.intersectionRatio: 해당 요소가 뷰포트에 보이는 비율(0~1)
         const ratio = entry.intersectionRatio;
-        let newBgState: "dark" | "light";
-        // 20% 이상 70% 미만 보이면 밝은 배경(light), 그 외에는 어두운 배경(dark)으로 설정
-        if (ratio >= 0.2 && ratio < 0.7) {
-          newBgState = "light";
-        } else {
-          newBgState = "dark";
+        const prev = prevRatioRef.current;
+        const isIncreasing = ratio > prev; // 들어오는 중인지(보이는 면적이 커지는 중인지)
+
+        // 섹션이 완전히 뷰포트에서 사라지는 순간(끝났을 때) 무조건 dark 고정
+        if (!entry.isIntersecting && prev > 0) {
+          if (bgState !== "dark") {
+            setBgState("dark");
+            if (onDarkChange) onDarkChange(true);
+          }
+          prevRatioRef.current = 0;
+          return;
         }
-        setBgState(newBgState); // 배경 상태 업데이트
-        // 부모 컴포넌트에 배경이 어두운지 여부를 콜백으로 전달(옵션)
-        if (onDarkChange) onDarkChange(newBgState === "dark");
+
+        let nextState: "dark" | "light" | null = null;
+        if (isIncreasing) {
+          // 아래로 스크롤하며 섹션에 진입하는 동안만 light 구간을 허용
+          if (ratio >= 0.7) nextState = "dark";
+          else if (ratio >= 0.2) nextState = "light";
+          else nextState = "dark";
+        } else {
+          // 섹션을 벗어날 때는 다시 light로 바뀌지 않도록 유지
+          if (ratio >= 0.7 || ratio < 0.2) nextState = "dark";
+          else nextState = null; // 0.2~0.7 구간에서는 상태 변경 없음
+        }
+
+        if (nextState && nextState !== bgState) {
+          setBgState(nextState);
+          if (onDarkChange) onDarkChange(nextState === "dark");
+        }
+
+        prevRatioRef.current = ratio;
       },
       {
         // threshold: 0~1까지 0.01 단위로 101개 지정
