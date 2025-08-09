@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import StickyNav from "@/components/common/StickyNav";
-import VideoScaleSection from "@/components/common/VideoScale";
+import VideoScale from "@/components/common/VideoScale";
 import styles from "./VideoReelSection.module.css";
 
 export type VideoItem = { src: string; text: string };
@@ -46,7 +46,7 @@ export default function VideoReelSection({ videos, dark = false }: VideoReelSect
     <div style={{ position: "relative" }} className={styles.wrapper} data-video-reel>
       <StickyNav titles={videos.map((v) => v.text)} index={currentVideoIdx} total={videos.length} />
       {videos.map((item, idx) => (
-        <VideoScaleSection
+        <VideoScale
           key={idx}
           videoSrc={item.src}
           text={item.text}
