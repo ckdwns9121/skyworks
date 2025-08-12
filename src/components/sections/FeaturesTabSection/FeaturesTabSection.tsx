@@ -66,7 +66,7 @@ export default function FeaturesTabSection({ features = DEFAULT_FEATURES, ctaTex
   }, [x]);
 
   return (
-    <section className="bg-white text-[#151515] w-full relative">
+    <section className="bg-white text-[#151515] w-full relative ">
       <div className="w-full pt-20 px-6 pb-10">
         <div className="text-[20px] leading-[1.5] mb-7 opacity-90">
           한 편, 두 편을 시작으로 다시 함께하고 싶은 프로덕션

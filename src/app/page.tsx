@@ -7,7 +7,9 @@ import ClientMarqueeSection from "@/components/sections/ClientMarqueeSection/Cli
 import VideoReelSection from "@/components/sections/VideoReelSection/VideoReelSection";
 import FeaturesTabSection from "@/components/sections/FeaturesTabSection/FeaturesTabSection";
 import ContactSection from "@/components/sections/ContactSection/ContactSection";
+import FooterSection from "@/components/sections/FooterSection/FooterSection";
 import { useEffect, useRef, useState } from "react";
+import { VIDEO_REEL_VIDEO_LIST } from "@/constants/video";
 
 export default function Home() {
   const pageRef = useRef<HTMLDivElement>(null);
@@ -54,27 +56,19 @@ export default function Home() {
   }, []);
 
   return (
-    <div ref={pageRef}>
-      <HeroSection />
-      <section data-space-section>
-        <SpaceSection />
-      </section>
-      {/* Space 끝 무렵: 클라이언트 로고 마퀴 섹션 (다크 상태 콜백을 페이지에서 수신) */}
-      <ClientMarqueeSection onDarkChange={setClientDark} />
-      {/* 비디오 릴 섹션 분리 */}
-      <VideoReelSection
-        dark={clientDark}
-        videos={[
-          { src: "/videos/video_main-music.mp4", text: "Music & Live" },
-          { src: "/videos/video_main-ad.mp4", text: "Advertising & Promotion" },
-          { src: "/videos/video_main-product.mp4", text: "Product promotion" },
-          { src: "/videos/video_main-youtube.mp4", text: "Youtube content" },
-          { src: "/videos/video_main-sketch.mp4", text: "Marketing & Sketch" },
-        ]}
-      />
-      <TextMarqueeSection text="About SKYWorKS" />
-      <FeaturesTabSection />
-      <ContactSection />
-    </div>
+    <main className="pb-[680px]">
+      <div ref={pageRef}>
+        <HeroSection />
+        <section data-space-section>
+          <SpaceSection />
+        </section>
+        <ClientMarqueeSection onDarkChange={setClientDark} />
+        <VideoReelSection dark={clientDark} videos={VIDEO_REEL_VIDEO_LIST} />
+        <TextMarqueeSection text="About SKYWorKS" />
+        <FeaturesTabSection />
+        <ContactSection />
+      </div>
+      <FooterSection />
+    </main>
   );
 }
