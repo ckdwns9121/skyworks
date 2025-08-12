@@ -89,7 +89,6 @@ export default function FeaturesTabSection({ features = DEFAULT_FEATURES, ctaTex
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() => setActive(i)}
                   whileHover={{
-                    skewX: -2,
                     transition: { duration: 0.3 },
                   }}
                 >
@@ -117,7 +116,7 @@ export default function FeaturesTabSection({ features = DEFAULT_FEATURES, ctaTex
                       opacity: i === active ? 1 : 0,
                       y: i === active ? 0 : -20,
                     }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    transition={{ duration: 0.1, ease: "easeOut" }}
                   >
                     <div className="flex gap-6 pb-6 relative">
                       {/* 영역1: 서브타이틀만 */}
