@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Lenis from "lenis";
 import { usePathname } from "next/navigation";
+
+import Lenis from "lenis";
 
 export default function LenisScroll() {
   const lenisRef = useRef<Lenis | null>(null);

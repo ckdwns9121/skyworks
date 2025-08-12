@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, forwardRef } from "react";
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 
 interface VideoScaleProps {
   videoSrc: string;
@@ -49,7 +49,7 @@ const VideoScale = forwardRef<HTMLDivElement, VideoScaleProps>(({ videoSrc, text
   }, []);
 
   // ref 연결
-  React.useImperativeHandle(ref, () => sectionRef.current as HTMLDivElement, [sectionRef.current]);
+  useImperativeHandle(ref, () => sectionRef.current as HTMLDivElement, [sectionRef.current]);
 
   return (
     <div

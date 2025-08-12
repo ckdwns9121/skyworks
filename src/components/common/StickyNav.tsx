@@ -1,4 +1,3 @@
-import React from "react";
 import TitleTicker from "./TitleTicker";
 
 interface StickyNavProps {
