@@ -60,28 +60,30 @@ export const validateRefs = <T>(refs: (T | null)[]): T[] => {
  * 윈도우 크기 정보를 안전하게 가져오기
  */
 export const getWindowDimensions = () => {
-  try {
-    return {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
-  } catch (error) {
-    console.warn("윈도우 크기 정보 가져오기 실패:", error);
+  if (typeof window === "undefined") {
+    console.warn(
+      "window 객체를 찾을 수 없어 윈도우 크기 정보를 가져올 수 없습니다. 서버사이드 렌더링 환경일 수 있습니다."
+    );
     return { width: 0, height: 0 };
   }
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
 };
 
 /**
  * 스크롤 위치를 안전하게 가져오기
  */
 export const getScrollPosition = () => {
-  try {
-    return {
-      x: window.scrollX,
-      y: window.scrollY,
-    };
-  } catch (error) {
-    console.warn("스크롤 위치 정보 가져오기 실패:", error);
+  if (typeof window === "undefined") {
+    console.warn(
+      "window 객체를 찾을 수 없어 스크롤 위치 정보를 가져올 수 없습니다. 서버사이드 렌더링 환경일 수 있습니다."
+    );
     return { x: 0, y: 0 };
   }
+  return {
+    x: window.scrollX,
+    y: window.scrollY,
+  };
 };
