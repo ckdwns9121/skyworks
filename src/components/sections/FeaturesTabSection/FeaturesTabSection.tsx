@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Feature = {
   title: string;
   description: string;
+  image: string;
 };
 
 type Props = {
@@ -15,74 +18,158 @@ type Props = {
 const DEFAULT_FEATURES: Feature[] = [
   {
     title: "Uncopyable Performance",
-    description:
-      "독창적인 연출과 현장 실행력을 통해 쉽게 따라할 수 없는 퍼포먼스를 만듭니다. 작은 디테일까지 설계해 당신의 브랜드만의 장면을 구축합니다.",
+    description: "남들을 흉내내지 않는, 카피할 수 없는 스카이웍스만의 퍼포먼스",
+    image: "/images/assets/uncopy.jpg",
   },
   {
     title: "World-Class Equipment",
-    description: "영화/광고급 카메라와 조명, 오디오 설비까지 완비된 파이프라인으로 안정적인 퀄리티를 보장합니다.",
+    description: "어설픈 장비를 취급하지 않는, 모두가 인정하는 장비 셋업.",
+    image: "/images/assets/world.jpg",
   },
   {
     title: "Decade of Expertise",
-    description:
-      "10년 이상의 제작 경험으로 다양한 장르와 포맷에서 최적의 해법을 제시하고, 현실적인 타임라인과 예산으로 프로젝트를 완주합니다.",
+    description: "10년, 전공 심화 과정부터 지금까지 우리가 달려올 수 있었던 노하우",
+    image: "/images/assets/decade.jpg",
   },
   {
     title: "Unstoppable Dedication",
-    description:
-      "끝까지 책임지는 태도로 촬영 전후를 막론하고 필요한 모든 것을 챙깁니다. 결과물이 나올 때까지 집중합니다.",
+    description: "저희와 함께했던 순간이 보다 많은 이들에게 닿기까지 우리는 멈추지 않겠습니다.",
+    image: "/images/assets/particle_blur.png",
   },
 ];
 
+function useMousePosition() {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    const handle = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener("mousemove", handle);
+    return () => window.removeEventListener("mousemove", handle);
+  }, []);
+  return pos;
+}
+
 export default function FeaturesTabSection({ features = DEFAULT_FEATURES, ctaText = "About SKYWorKS" }: Props) {
   const [active, setActive] = useState(0);
-  const activeFeature = useMemo(() => features[active], [features, active]);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [skew, setSkew] = useState(0);
+  const lastX = useRef(0);
+  const { x, y } = useMousePosition();
+
+  // skew 효과: 마우스 이동 속도에 따라 skew 조정
+  useEffect(() => {
+    const diff = x - lastX.current;
+    setSkew(Math.max(-20, Math.min(20, diff * 0.6)));
+    lastX.current = x;
+    // skew 점진적 복원
+    const id = setTimeout(() => setSkew(0), 120);
+    return () => clearTimeout(id);
+  }, [x]);
 
   return (
-    <section className="bg-white text-[#151515] w-full">
+    <section className="bg-white text-[#151515] w-full relative">
       <div className="w-full pt-20 px-6 pb-10">
         <div className="text-[20px] leading-[1.5] mb-7 opacity-90">
           한 편, 두 편을 시작으로 다시 함께하고 싶은 프로덕션
         </div>
 
-        <ul className="mt-6 mb-14 p-0 list-none border-t border-black/10">
-          {features.map((f, i) => (
-            <li
-              key={i}
-              className="relative flex items-center gap-4 h-[108px] border-b border-black/10 cursor-pointer"
-              onMouseEnter={() => setActive(i)}
-              onClick={() => setActive(i)}
-            >
-              <span
-                className={`absolute left-[-18px] w-[10px] h-[10px] rounded-full bg-[#2f5ee8] ${
-                  i === active ? "visible" : "invisible"
-                }`}
-              />
-              <span
-                className={`font-medium transition-colors duration-200 ease-out text-[clamp(22px,3.2vw,36px)] ${
-                  i === active ? "text-[#151515]" : "text-[#151515]/35"
-                }`}
+        <div className="flex gap-8">
+          {/* 왼쪽 탭 영역 */}
+          <div className="flex-1">
+            <ul className="mt-6 mb-14 p-0 list-none border-t border-black/10">
+              {features.map((f, i) => (
+                <motion.li
+                  key={i}
+                  className={`relative border-b border-black/10 cursor-pointer transition-all duration-500 ease-out overflow-hidden ${
+                    i === active ? "h-auto" : "h-[108px]"
+                  }`}
+                  onMouseEnter={() => {
+                    setHoveredIndex(i);
+                    setActive(i);
+                  }}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  onClick={() => setActive(i)}
+                  whileHover={{
+                    skewX: -2,
+                    transition: { duration: 0.3 },
+                  }}
+                >
+                  <div className="flex items-center gap-4 h-[108px]">
+                    <motion.span
+                      className={`font-medium transition-all duration-300 ease-out text-[clamp(22px,3.2vw,36px)] ${
+                        i === active ? "text-[#151515]" : "text-[#151515]/35"
+                      }`}
+                      animate={{
+                        color: i === active ? "#151515" : "rgba(21, 21, 21, 0.35)",
+                        x: hoveredIndex === i ? 10 : 0,
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {f.title}
+                    </motion.span>
+                  </div>
+
+                  {/* 탭 내용 영역 */}
+                  <motion.div
+                    className="transition-all duration-500 ease-out"
+                    initial={{ maxHeight: 0, opacity: 0, y: -20 }}
+                    animate={{
+                      maxHeight: i === active ? 256 : 0,
+                      opacity: i === active ? 1 : 0,
+                      y: i === active ? 0 : -20,
+                    }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                  >
+                    <div className="flex gap-6 pb-6 relative">
+                      {/* 영역1: 서브타이틀만 */}
+                      <div className="flex-1">
+                        <p className="text-[16px] leading-[1.65] text-[#151515]/70">{f.description}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.li>
+              ))}
+            </ul>
+
+            <div className="flex justify-center mt-14">
+              <button
+                className="inline-flex items-center gap-[10px] rounded-full border border-[#151515] bg-white text-[#151515] px-7 py-[18px] text-[18px] leading-none transition hover:-translate-y-px"
+                type="button"
               >
-                {f.title}
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        {activeFeature && (
-          <p className="mt-4 text-[16px] leading-[1.65] text-[#151515]/70">{activeFeature.description}</p>
-        )}
-
-        <div className="flex justify-center mt-14">
-          <button
-            className="inline-flex items-center gap-[10px] rounded-full border border-[#151515] bg-white text-[#151515] px-7 py-[18px] text-[18px] leading-none transition hover:-translate-y-px"
-            type="button"
-          >
-            {ctaText}
-            <span aria-hidden>→</span>
-          </button>
+                {ctaText}
+                <span aria-hidden>→</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* 커스텀 커서 이미지 - 참고 코드와 동일한 로직 */}
+      <AnimatePresence>
+        {hoveredIndex !== null && (
+          <motion.div
+            key={hoveredIndex}
+            className="pointer-events-none fixed left-0 top-0 z-[2000] w-48 h-48 rounded-lg overflow-hidden bg-white shadow-[0_4px_32px_rgba(0,0,0,0.18)]"
+            initial={{ opacity: 0, scale: 0.7, x: x - 96, y: y - 96, skewX: skew }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              x: x - 96,
+              y: y - 96,
+              skewX: skew,
+            }}
+            exit={{ opacity: 0, scale: 0.7 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <Image
+              src={features[hoveredIndex].image}
+              alt={features[hoveredIndex].title}
+              fill
+              className="object-cover"
+              sizes="192px"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

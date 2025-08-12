@@ -6,6 +6,7 @@ import TextMarqueeSection from "@/components/sections/TextMarqueeSection/TextMar
 import ClientMarqueeSection from "@/components/sections/ClientMarqueeSection/ClientMarqueeSection";
 import VideoReelSection from "@/components/sections/VideoReelSection/VideoReelSection";
 import FeaturesTabSection from "@/components/sections/FeaturesTabSection/FeaturesTabSection";
+import ContactSection from "@/components/sections/ContactSection/ContactSection";
 import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
@@ -73,6 +74,7 @@ export default function Home() {
       />
       <TextMarqueeSection text="About SKYWorKS" />
       <FeaturesTabSection />
+      <ContactSection />
     </div>
   );
 }
