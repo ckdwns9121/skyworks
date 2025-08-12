@@ -71,6 +71,7 @@ export default function FeaturesTabSection({ features = DEFAULT_FEATURES, ctaTex
         <div className="text-[20px] leading-[1.5] mb-7 opacity-90">
           한 편, 두 편을 시작으로 다시 함께하고 싶은 프로덕션
         </div>
+        <div className="text-[20px] leading-[1.5] mb-7 opacity-90">우리는 SKYWoRKS입니다</div>
 
         <div className="flex gap-8">
           {/* 왼쪽 탭 영역 */}

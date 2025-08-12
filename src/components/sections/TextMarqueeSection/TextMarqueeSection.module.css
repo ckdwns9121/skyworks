@@ -21,11 +21,11 @@
 }
 
 .animateLeft {
-  animation: marquee-left 28s linear infinite;
+  animation: marquee-left 45s linear infinite;
 }
 
 .animateRight {
-  animation: marquee-right 28s linear infinite;
+  animation: marquee-right 45s linear infinite;
 }
 
 @keyframes marquee-left {
@@ -47,15 +47,31 @@
 }
 
 .item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 32px;
   padding: 0 32px;
+  flex-shrink: 0;
 }
 
 .star {
-  width: 36px;
-  height: 36px;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.rotating {
+  animation: rotate 8s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 배경/텍스트 컬러 타임라인 (0~1s) */

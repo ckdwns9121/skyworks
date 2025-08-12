@@ -8,52 +8,11 @@ import VideoReelSection from "@/components/sections/VideoReelSection/VideoReelSe
 import FeaturesTabSection from "@/components/sections/FeaturesTabSection/FeaturesTabSection";
 import ContactSection from "@/components/sections/ContactSection/ContactSection";
 import FooterSection from "@/components/sections/FooterSection/FooterSection";
-import { useEffect, useRef, useState } from "react";
 import { VIDEO_REEL_VIDEO_LIST } from "@/constants/video";
+import { useScrollProgress } from "@/hooks/useScrollProgress";
 
 export default function Home() {
-  const pageRef = useRef<HTMLDivElement>(null);
-  const marqueeRef = useRef<HTMLElement | null>(null);
-  const [clientDark, setClientDark] = useState(false);
-  const videoReelRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const container = pageRef.current;
-    if (!container) return;
-    marqueeRef.current = container.querySelector<HTMLElement>("[data-marquee-section]");
-    videoReelRef.current = container.querySelector<HTMLElement>("[data-video-reel]");
-    const spaceSection = container.querySelector<HTMLElement>("section[data-space-section]");
-    if (!marqueeRef.current || !spaceSection) return;
-
-    const handleScroll = () => {
-      const spaceRect = spaceSection.getBoundingClientRect();
-      const start = spaceRect.bottom - window.innerHeight; // 스페이스 섹션 하단이 화면 하단과 만나는 지점
-      const end = spaceRect.bottom; // 완전히 지나칠 때
-      const current = 0; // 기준은 viewport top(0)
-      const progressRaw = (current - start) / (end - start || 1);
-      const progress = Math.min(1, Math.max(0, progressRaw));
-      marqueeRef.current!.style.setProperty("--progress", String(progress));
-      // VideoReel 진행률: 상단 30%까지는 0, 이후 70% 구간에서 0->1
-      if (videoReelRef.current) {
-        const rect = videoReelRef.current.getBoundingClientRect();
-        const total = rect.height;
-        const y = Math.min(Math.max(-rect.top, 0), total); // 0 ~ height
-        const startAt = total * 0.3;
-        const endAt = total * 1.0; // 바닥까지
-        const raw = (y - startAt) / (endAt - startAt || 1);
-        const p = Math.min(1, Math.max(0, raw));
-        videoReelRef.current.style.setProperty("--videoProgress", String(p));
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
-    handleScroll();
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, []);
+  const { pageRef, clientDark, setClientDark } = useScrollProgress();
 
   return (
     <main className="pb-[680px]">
