@@ -129,6 +129,9 @@ export default function VideoReelSection({ videos, dark = false }: VideoReelSect
           ref={(el) => {
             if (el) {
               videoRefs.current[idx] = el;
+            } else {
+              // ref가 null인 경우 처리
+              console.warn(`VideoScale ${idx} ref가 null입니다.`);
             }
           }}
         />

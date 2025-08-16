@@ -21,7 +21,7 @@ interface UseVideoScaleReturn {
   opacity: number;
   error: string | null;
   isAnimating: boolean;
-  ref: React.RefObject<HTMLDivElement>;
+  ref: React.RefObject<HTMLDivElement | null>;
 }
 
 const DEFAULT_OPTIONS: Required<UseVideoScaleOptions> = {
@@ -131,6 +131,19 @@ export const useVideoScale = (options: UseVideoScaleOptions = {}): UseVideoScale
     }
     setIsAnimating(false);
   }, []);
+
+  // ref가 유효한지 확인하는 함수
+  const isRefValid = useCallback(() => {
+    return sectionRef.current !== null;
+  }, []);
+
+  // 안전한 ref 접근 함수
+  const getValidRef = useCallback(() => {
+    if (!isRefValid()) {
+      throw new Error("VideoScale ref가 유효하지 않습니다.");
+    }
+    return sectionRef.current!;
+  }, [isRefValid]);
 
   // Intersection Observer를 사용하여 섹션이 뷰포트에 보일 때만 애니메이션 실행
   useEffect(() => {
