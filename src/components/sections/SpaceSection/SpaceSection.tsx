@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import ScrollTriggerText from "@/components/sections/SpaceSection/ScrollTriggerText";
-import { useThreeScene } from "@/hooks/useThreeScene";
+import { useThreeScene } from "@/hooks/media/useThreeScene";
 
 export default function SpaceSection() {
   const mountRef = useRef<HTMLDivElement>(null);
