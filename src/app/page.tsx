@@ -10,7 +10,7 @@ import ContactSection from "@/components/sections/ContactSection/ContactSection"
 import FooterSection from "@/components/sections/FooterSection/FooterSection";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import { VIDEO_REEL_VIDEO_LIST } from "@/constants/video";
-import { useScrollProgress } from "@/hooks/useScrollProgress";
+import { useScrollProgress } from "@/hooks/scroll/useScrollProgress";
 
 export default function Home() {
   const { pageRef, clientDark, setClientDark, error } = useScrollProgress();
