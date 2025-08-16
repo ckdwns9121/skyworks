@@ -2,7 +2,7 @@
  * VideoScale 컴포넌트의 애니메이션 로직을 담당하는 훅
  */
 
-import { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { safeGetBoundingRect, getWindowDimensions } from "@/utils/domUtils";
 import { calculateScale, calculateOpacity } from "@/utils/animation/calculations";
 import { calculateCenterDistance, calculateMaxDistance, isNearCenter } from "@/utils/scroll/calculations";
