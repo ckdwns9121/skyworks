@@ -15,9 +15,47 @@ export default function SpaceSection() {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const composerRef = useRef<EffectComposer | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
+  const fogParticlesRef = useRef<THREE.Points | null>(null);
   const animationRef = useRef<number | null>(null);
-  // ScrollTriggerText 관련 상태 모두 제거
-  // 섹션 외부 결합 제거: 다크 상태/비디오 리스트는 외부에서 관리
+
+  // 반응형을 위한 상태 추가
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  // 리사이즈 핸들러 개선
+  const handleResize = () => {
+    if (!mountRef.current || !cameraRef.current || !rendererRef.current || !composerRef.current) return;
+
+    const width = mountRef.current.clientWidth;
+    const height = mountRef.current.clientHeight;
+
+    // 새로운 크기로 상태 업데이트
+    setDimensions({ width, height });
+
+    // 렌더러 크기 업데이트
+    rendererRef.current.setSize(width, height);
+
+    // 카메라 비율 업데이트
+    cameraRef.current.aspect = width / height;
+    cameraRef.current.updateProjectionMatrix();
+
+    // 파티클 크기 조정 (화면 크기에 따라)
+    if (particlesRef.current) {
+      const material = particlesRef.current.material as THREE.ShaderMaterial;
+      // 화면 크기에 따라 파티클 크기 조정
+      const baseSize = Math.min(width, height) / 1000; // 화면 크기에 비례한 기본 크기
+      material.uniforms.baseSize = { value: baseSize };
+    }
+
+    // 안개 파티클 크기 조정
+    if (fogParticlesRef.current) {
+      const fogMaterial = fogParticlesRef.current.material as THREE.PointsMaterial;
+      const baseFogSize = Math.min(width, height) / 100; // 화면 크기에 비례한 안개 크기
+      fogMaterial.size = baseFogSize;
+    }
+
+    // 컴포저 크기 업데이트
+    composerRef.current.setSize(width, height);
+  };
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -25,29 +63,29 @@ export default function SpaceSection() {
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
-    const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 1000); // aspect는 아래에서 설정
-    camera.position.set(0, 0, 8); // 15 → 8로 변경
+    const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 1000);
+    camera.position.set(0, 0, 8);
     cameraRef.current = camera;
 
-    // mountRef의 크기를 기준으로 캔버스 크기 설정
+    // 초기 크기 설정
     const width = mountRef.current.clientWidth;
     const height = mountRef.current.clientHeight;
+    setDimensions({ width, height });
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor("#151515"); // 배경색 설정
+    renderer.setClearColor("#151515");
     renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 성능 최적화
     mountRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // 카메라 비율도 mountRef 기준으로 설정
+    // 카메라 비율 설정
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 
-    // POST-PROCESSING: Composer + Bloom (강도 낮춤)
+    // POST-PROCESSING: Composer + Bloom
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    // bloom 효과 제거
     composerRef.current = composer;
 
     // PARTICLES
@@ -60,10 +98,8 @@ export default function SpaceSection() {
       let radius;
       const ratio = Math.random();
       if (ratio < 0.05) {
-        // 5%만 중심부(0~2)에 생성
         radius = Math.random() * 2;
       } else {
-        // 95%는 2~20에 생성 (기존 2~8 → 2~20)
         radius = 2 + Math.random() * 18;
       }
       const branch = ((i % 4) / 4) * Math.PI * 2;
@@ -81,7 +117,6 @@ export default function SpaceSection() {
 
       const colorVariation = Math.random();
       if (radius < 2) {
-        // 중심부 → 적당히 밝게 (너무 과하지 않게 1.5~2)
         colors[i * 3] = 2;
         colors[i * 3 + 1] = 2;
         colors[i * 3 + 2] = 2;
@@ -106,20 +141,25 @@ export default function SpaceSection() {
     geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
 
     const material = new THREE.ShaderMaterial({
-      uniforms: { time: { value: 0 } },
+      uniforms: {
+        time: { value: 0 },
+        baseSize: { value: Math.min(width, height) / 1000 }, // 반응형 크기 추가
+      },
       vertexShader: /* glsl */ `
         attribute float size;
         attribute vec3 color;
         varying vec3 vColor;
         varying float vAlpha;
         uniform float time;
+        uniform float baseSize;
         
         void main() {
           vColor = color;
           float flicker = sin(time * 2.0 + position.x * 50.0 + position.y * 50.0) * 0.3 + 0.7;
           vAlpha = flicker;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = size * (300.0 / -mvPosition.z);
+          // baseSize를 곱해서 반응형 크기 조정
+          gl_PointSize = size * baseSize * (300.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
@@ -143,8 +183,8 @@ export default function SpaceSection() {
     scene.add(particles);
     particlesRef.current = particles;
 
-    // === 안개 파티클 추가 (별 파티클과 같은 분포, 적은 수, 크게, 투명하게) ===
-    const fogParticleCount = 60; // 훨씬 적게
+    // === 안개 파티클 추가 ===
+    const fogParticleCount = 60;
     const fogPositions = new Float32Array(fogParticleCount * 3);
     const fogSizes = new Float32Array(fogParticleCount);
     for (let i = 0; i < fogParticleCount; i++) {
@@ -163,7 +203,7 @@ export default function SpaceSection() {
       fogPositions[i * 3] = x;
       fogPositions[i * 3 + 1] = y;
       fogPositions[i * 3 + 2] = z;
-      fogSizes[i] = 10 + Math.random() * 14; // 10~24 사이 크게
+      fogSizes[i] = 10 + Math.random() * 14;
     }
     const fogGeometry = new THREE.BufferGeometry();
     fogGeometry.setAttribute("position", new THREE.BufferAttribute(fogPositions, 3));
@@ -171,31 +211,29 @@ export default function SpaceSection() {
     const fogTexture = new THREE.TextureLoader().load("/images/assets/particle_blur.png");
     const fogMaterial = new THREE.PointsMaterial({
       map: fogTexture,
-      size: 16,
+      size: Math.min(width, height) / 100, // 반응형 크기
       transparent: true,
       opacity: 0.09,
       depthWrite: false,
       blending: THREE.AdditiveBlending,
-      color: 0x6ecaff, // 밝은 파랑
+      color: 0x6ecaff,
     });
     const fogParticles = new THREE.Points(fogGeometry, fogMaterial);
     fogParticles.name = "fogParticles";
     scene.add(fogParticles);
-    // === 안개 파티클 추가 끝 ===
+    fogParticlesRef.current = fogParticles;
 
     const animate = () => {
       animationRef.current = requestAnimationFrame(animate);
       const time = Date.now() * 0.001;
 
       if (particlesRef.current) {
-        // 기본 회전(항상 적용)
         particlesRef.current.rotation.y += 0.0005;
         (particlesRef.current.material as THREE.ShaderMaterial).uniforms.time.value = time;
       }
-      // 안개 파티클도 약간씩 회전
-      const fog = scene.getObjectByName("fogParticles");
-      if (fog) {
-        fog.rotation.y += 0.00015;
+
+      if (fogParticlesRef.current) {
+        fogParticlesRef.current.rotation.y += 0.00015;
       }
 
       if (composerRef.current) {
@@ -205,7 +243,6 @@ export default function SpaceSection() {
     animate();
 
     const handleScroll = () => {
-      // ... three.js 카메라/파티클 스크롤 효과만 남김 ...
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const visibleRatio = (window.innerHeight - rect.top) / rect.height;
@@ -216,9 +253,9 @@ export default function SpaceSection() {
           return;
         }
         const progress = Math.min((visibleRatio - 0.5) / 0.5, 1);
-        const startPos = new THREE.Vector3(0, 0, 8); // 15 → 8
-        const midPos = new THREE.Vector3(0, 0, 18); // 40 → 18
-        const endPos = new THREE.Vector3(0, 10, 12); // 25 → 12
+        const startPos = new THREE.Vector3(0, 0, 8);
+        const midPos = new THREE.Vector3(0, 0, 18);
+        const endPos = new THREE.Vector3(0, 10, 12);
         const rotationAmount = Math.PI * 1.5;
         if (progress < 0.6) {
           const phase = progress / 0.6;
@@ -233,13 +270,19 @@ export default function SpaceSection() {
         }
       }
     };
+
+    // 이벤트 리스너 등록
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener("resize", handleResize);
+
+    // 초기 실행
     handleScroll();
+    handleResize();
+
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener("resize", handleResize);
       if (mountRef.current && rendererRef.current) {
         mountRef.current.removeChild(rendererRef.current.domElement);
       }
