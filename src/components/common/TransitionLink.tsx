@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, MouseEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { usePageTransition } from "./PageTransition";
 
 interface TransitionLinkProps {
@@ -18,19 +18,19 @@ interface TransitionLinkProps {
 
 export default function TransitionLink({ href, children, className = "", onClick, ...props }: TransitionLinkProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { startTransition, isTransitioning } = usePageTransition();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-
-    // 이미 트랜지션 중이거나 같은 페이지라면 무시
-    if (isTransitioning || window.location.pathname === href) {
+    // 외부 링크는 브라우저의 기본 동작에 맡겨 `target` 속성을 존중하도록 합니다.
+    if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) {
       return;
     }
 
-    // 외부 링크인 경우 바로 이동
-    if (href.startsWith("http") || href.startsWith("mailto:") || href.startsWith("tel:")) {
-      window.open(href, "_blank");
+    e.preventDefault();
+
+    // 이미 트랜지션 중이거나 같은 페이지라면 무시
+    if (isTransitioning || pathname === href) {
       return;
     }
 

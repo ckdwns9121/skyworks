@@ -1,8 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
 interface PageTransitionContextType {
   startTransition: (url: string, callback?: () => void) => void;
@@ -26,15 +25,6 @@ interface PageTransitionProviderProps {
 export function PageTransitionProvider({ children }: PageTransitionProviderProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [transitionCallback, setTransitionCallback] = useState<(() => void) | null>(null);
-  const [currentPath, setCurrentPath] = useState<string>("");
-  const pathname = usePathname();
-
-  // 경로 변경 감지
-  useEffect(() => {
-    if (pathname !== currentPath) {
-      setCurrentPath(pathname);
-    }
-  }, [pathname, currentPath]);
 
   const startTransition = useCallback((url: string, callback?: () => void) => {
     setIsTransitioning(true);
