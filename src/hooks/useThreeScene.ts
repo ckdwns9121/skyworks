@@ -115,21 +115,13 @@ export const useThreeScene = ({ mountRef, containerRef }: UseThreeSceneProps) =>
 
       const colorVariation = Math.random();
       if (radius < PARTICLE_CONFIG.main.radius.inner) {
-        colors[i * 3] = PARTICLE_CONFIG.colors.inner[0];
-        colors[i * 3 + 1] = PARTICLE_CONFIG.colors.inner[1];
-        colors[i * 3 + 2] = PARTICLE_CONFIG.colors.inner[2];
+        colors.set(PARTICLE_CONFIG.colors.inner, i * 3);
       } else if (colorVariation < PARTICLE_CONFIG.colorThresholds.white) {
-        colors[i * 3] = PARTICLE_CONFIG.colors.white[0];
-        colors[i * 3 + 1] = PARTICLE_CONFIG.colors.white[1];
-        colors[i * 3 + 2] = PARTICLE_CONFIG.colors.white[2];
+        colors.set(PARTICLE_CONFIG.colors.white, i * 3);
       } else if (colorVariation < PARTICLE_CONFIG.colorThresholds.orange) {
-        colors[i * 3] = PARTICLE_CONFIG.colors.orange[0];
-        colors[i * 3 + 1] = PARTICLE_CONFIG.colors.orange[1];
-        colors[i * 3 + 2] = PARTICLE_CONFIG.colors.orange[2];
+        colors.set(PARTICLE_CONFIG.colors.orange, i * 3);
       } else {
-        colors[i * 3] = PARTICLE_CONFIG.colors.blue[0];
-        colors[i * 3 + 1] = PARTICLE_CONFIG.colors.blue[1];
-        colors[i * 3 + 2] = PARTICLE_CONFIG.colors.blue[2];
+        colors.set(PARTICLE_CONFIG.colors.blue, i * 3);
       }
     }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import ScrollTriggerText from "@/components/sections/SpaceSection/ScrollTriggerText";
 import { useThreeScene } from "@/hooks/useThreeScene";
 
@@ -8,11 +8,7 @@ export default function SpaceSection() {
   const mountRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 반응형을 위한 상태 추가
-  const [, setDimensions] = useState({ width: 0, height: 0 });
-
-  // 3D 씬 훅 사용
-  const { sceneRef, cameraRef, rendererRef, composerRef, particlesRef, fogParticlesRef, animationRef } = useThreeScene({
+  useThreeScene({
     mountRef,
     containerRef,
   });
