@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import LenisScroll from "@/components/common/LenisScroll";
 import SiteHeader from "@/components/layout/SiteHeader";
+import PageTransitionProvider from "@/components/common/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,9 +45,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${hanken.variable} antialiased`}>
-        <LenisScroll />
-        <SiteHeader />
-        {children}
+        <PageTransitionProvider>
+          <LenisScroll />
+          <SiteHeader />
+          {children}
+        </PageTransitionProvider>
       </body>
     </html>
   );
